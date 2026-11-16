@@ -20,5 +20,21 @@ trabajadores (niveles 1–4) y diseñen planes de carrera.
 ## Diseño
 Sistema de diseño Glasstech (Raleway/Montserrat; azul `#00324B`, celeste `#0096D2`, naranjo `#F7841C`, gris `#7E96A2`).
 
-## Configuración
-Copia `.env.example` a `.env`.
+## Puesta en marcha
+```bash
+cp .env.example .env
+npm install
+npm run dev
+```
+
+### Primer usuario Gerencia (una sola vez)
+Quien se registra queda como `trabajador`. Después de registrar y confirmar tu correo, asigna el primer perfil
+Gerencia desde el SQL Editor de Supabase; luego Gerencia administra al resto desde la app (menú *Usuarios*):
+
+```sql
+update public.profiles set app_role = 'gerencia' where email = 'tu-correo@glasstech.cl';
+```
+
+### Autenticación en Supabase
+Mantén activada la confirmación de correo (Authentication → Providers → Email). El vínculo trabajador ↔ cuenta
+solo se hace con correos confirmados. En *URL Configuration* define la *Site URL* de producción.
