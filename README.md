@@ -38,3 +38,8 @@ update public.profiles set app_role = 'gerencia' where email = 'tu-correo@glasst
 ### Autenticación en Supabase
 Mantén activada la confirmación de correo (Authentication → Providers → Email). El vínculo trabajador ↔ cuenta
 solo se hace con correos confirmados. En *URL Configuration* define la *Site URL* de producción.
+
+## Despliegue en Vercel
+1. En Vercel: *Add New → Project* e importa este repositorio (el preset *Vite* se detecta solo; `vercel.json` ya define la regla SPA).
+2. En *Environment Variables* agrega `VITE_SUPABASE_URL` y `VITE_SUPABASE_PUBLISHABLE_KEY` con los valores de `.env.example`.
+3. Tras el primer deploy, copia la URL de producción a Supabase → Authentication → URL Configuration (*Site URL* y *Redirect URLs*).
