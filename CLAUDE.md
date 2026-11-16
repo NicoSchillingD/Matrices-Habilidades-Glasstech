@@ -14,6 +14,8 @@ React 18 + Vite + TypeScript, `react-router-dom`, `@supabase/supabase-js`. Sin l
 ## Backend (Supabase, proyecto `gzjsbwcuweuqxnuosbir`, sa-east-1)
 - El esquema vive en `supabase/migrations/` y es la fuente de verdad. Cada cambio = migración nueva (no editar las aplicadas).
 - Toda la seguridad es RLS; el cliente usa solo la clave publicable. Funciones de ayuda en el schema `private`.
+- `supabase/functions/admin-create-user`: Edge Function (clave de servicio) con la que Gerencia crea usuarios; valida el perfil
+  del llamador en el servidor. Se despliega con la herramienta MCP de Supabase o `supabase functions deploy`.
 - Tras cambios de DDL correr los advisors de seguridad de Supabase.
 - Gotcha RLS: una política de `SELECT` que consulte su propia tabla desde una función no ve la fila de un
   `INSERT ... RETURNING`. Evaluar columnas directamente (ver `20261116000100_fix_workers_select_policy.sql`).
