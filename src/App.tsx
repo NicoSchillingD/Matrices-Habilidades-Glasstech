@@ -3,6 +3,7 @@ import { useAuth } from './lib/auth'
 import type { AppRole } from './lib/types'
 import Layout from './components/Layout'
 import { Loading } from './components/ui'
+import AccountPage from './pages/AccountPage'
 import LoginPage from './pages/LoginPage'
 import MatrixPage from './pages/MatrixPage'
 import MyEvaluationsPage from './pages/MyEvaluationsPage'
@@ -35,6 +36,7 @@ export default function App() {
         <Route path="/roles" element={<Guard roles={STAFF}><RolesPage /></Guard>} />
         <Route path="/usuarios" element={<Guard roles={['gerencia']}><UsersPage /></Guard>} />
         <Route path="/mis-evaluaciones" element={<Guard roles={['trabajador']}><MyEvaluationsPage /></Guard>} />
+        <Route path="/cuenta" element={<AccountPage />} />
         <Route path="*" element={<Navigate to={home} replace />} />
       </Route>
     </Routes>

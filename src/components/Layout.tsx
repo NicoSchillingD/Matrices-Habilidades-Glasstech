@@ -8,6 +8,7 @@ const NAV: { to: string; label: string; roles: AppRole[] }[] = [
   { to: '/roles', label: 'Roles y habilidades', roles: ['supervisor', 'jefatura', 'gerencia'] },
   { to: '/usuarios', label: 'Usuarios', roles: ['gerencia'] },
   { to: '/mis-evaluaciones', label: 'Mis evaluaciones', roles: ['trabajador'] },
+  { to: '/cuenta', label: 'Mi cuenta', roles: ['trabajador', 'supervisor', 'jefatura', 'gerencia'] },
 ]
 
 export default function Layout() {
