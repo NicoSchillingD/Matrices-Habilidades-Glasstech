@@ -7,6 +7,10 @@ interface AuthState {
   session: Session | null
   profile: Profile | null
   loading: boolean
+  recovering: boolean
+  finishRecovery: () => void
+  refreshProfile: () => Promise<void>
+  resetPassword: (email: string) => Promise<string | null>
   signIn: (email: string, password: string) => Promise<string | null>
   signUp: (email: string, password: string, fullName: string) => Promise<string | null>
   signOut: () => Promise<void>
@@ -18,13 +22,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null)
   const [profile, setProfile] = useState<Profile | null>(null)
   const [loading, setLoading] = useState(true)
+  const [recovering, setRecovering] = useState(false)
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
       setSession(data.session)
       if (!data.session) setLoading(false)
     })
-    const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => {
+    const { data: sub } = supabase.auth.onAuthStateChange((event, s) => {
+      if (event === 'PASSWORD_RECOVERY') setRecovering(true)
       setSession(s)
       if (!s) {
         setProfile(null)
@@ -57,6 +63,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     session,
     profile,
     loading,
+    recovering,
+    finishRecovery: () => setRecovering(false),
+    refreshProfile: async () => {
+      if (!userId) return
+      const { data } = await supabase.from('profiles').select('id,email,full_name,app_role').eq('id', userId).single()
+      if (data) setProfile(data as Profile)
+    },
+    resetPassword: async (email) => {
+      // Mensaje siempre genérico en la UI: no revela si el correo existe
+      const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: window.location.origin })
+      return error && /rate limit|too many/i.test(error.message)
+        ? 'Se enviaron demasiados correos. Espera unos minutos e inténtalo de nuevo.'
+        : null
+    },
     signIn: async (email, password) => {
       const { error } = await supabase.auth.signInWithPassword({ email, password })
       return error ? traducir(error.message) : null

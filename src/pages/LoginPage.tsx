@@ -3,8 +3,8 @@ import { useAuth } from '../lib/auth'
 import { Alert } from '../components/ui'
 
 export default function LoginPage() {
-  const { signIn, signUp } = useAuth()
-  const [mode, setMode] = useState<'in' | 'up'>('in')
+  const { signIn, signUp, resetPassword } = useAuth()
+  const [mode, setMode] = useState<'in' | 'up' | 'reset'>('in')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [fullName, setFullName] = useState('')
@@ -17,7 +17,11 @@ export default function LoginPage() {
     setBusy(true)
     setError(null)
     setInfo(null)
-    if (mode === 'in') {
+    if (mode === 'reset') {
+      const err = await resetPassword(email.trim())
+      if (err) setError(err)
+      else setInfo('Si el correo está registrado, te enviamos un enlace para definir una nueva contraseña.')
+    } else if (mode === 'in') {
       setError(await signIn(email, password))
     } else {
       const err = await signUp(email, password, fullName)
@@ -37,7 +41,7 @@ export default function LoginPage() {
       </section>
       <section className="auth-form">
         <form onSubmit={submit}>
-          <h2>{mode === 'in' ? 'Ingresar' : 'Crear cuenta'}</h2>
+          <h2>{mode === 'in' ? 'Ingresar' : mode === 'up' ? 'Crear cuenta' : 'Recuperar contraseña'}</h2>
           {mode === 'up' && (
             <label className="field">Nombre completo
               <input value={fullName} onChange={(e) => setFullName(e.target.value)} required autoComplete="name" />
@@ -46,16 +50,21 @@ export default function LoginPage() {
           <label className="field">Correo
             <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required autoComplete="email" />
           </label>
-          <label className="field">Contraseña
+          {mode !== 'reset' && <label className="field">Contraseña
             <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={8}
               autoComplete={mode === 'in' ? 'current-password' : 'new-password'} />
-          </label>
+          </label>}
           {error && <Alert>{error}</Alert>}
           {info && <Alert kind="ok">{info}</Alert>}
-          <button className="btn accent" disabled={busy}>{mode === 'in' ? 'Ingresar' : 'Crear cuenta'}</button>
-          <button type="button" className="btn ghost" onClick={() => { setMode(mode === 'in' ? 'up' : 'in'); setError(null); setInfo(null) }}>
-            {mode === 'in' ? 'No tengo cuenta' : 'Ya tengo cuenta'}
+          <button className="btn accent" disabled={busy}>{mode === 'in' ? 'Ingresar' : mode === 'up' ? 'Crear cuenta' : 'Enviar enlace'}</button>
+          <button type="button" className="btn ghost" onClick={() => { setMode(mode === 'up' ? 'in' : mode === 'in' ? 'up' : 'in'); setError(null); setInfo(null) }}>
+            {mode === 'in' ? 'No tengo cuenta' : mode === 'up' ? 'Ya tengo cuenta' : 'Volver a ingresar'}
           </button>
+          {mode === 'in' && (
+            <button type="button" className="btn ghost" onClick={() => { setMode('reset'); setError(null); setInfo(null) }}>
+              Olvidé mi contraseña
+            </button>
+          )}
           {mode === 'up' && <p className="muted" style={{ margin: 0 }}>Tu perfil inicial es Trabajador. Gerencia puede asignarte otro perfil.</p>}
         </form>
       </section>

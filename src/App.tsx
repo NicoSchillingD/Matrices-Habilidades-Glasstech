@@ -5,6 +5,7 @@ import Layout from './components/Layout'
 import { Loading } from './components/ui'
 import AccountPage from './pages/AccountPage'
 import LoginPage from './pages/LoginPage'
+import ResetPasswordPage from './pages/ResetPasswordPage'
 import MatrixPage from './pages/MatrixPage'
 import MyEvaluationsPage from './pages/MyEvaluationsPage'
 import RolesPage from './pages/RolesPage'
@@ -21,7 +22,8 @@ function Guard({ roles, children }: { roles: AppRole[]; children: React.ReactNod
 }
 
 export default function App() {
-  const { session, profile, loading } = useAuth()
+  const { session, profile, loading, recovering } = useAuth()
+  if (recovering) return <ResetPasswordPage />
   if (loading) return <Loading />
   if (!session) return <LoginPage />
   if (!profile) return <div className="center">No se pudo cargar tu perfil. Cierra sesión e inténtalo de nuevo.</div>

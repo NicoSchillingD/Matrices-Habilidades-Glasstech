@@ -16,6 +16,8 @@ React 18 + Vite + TypeScript, `react-router-dom`, `@supabase/supabase-js`. Sin l
 - Toda la seguridad es RLS; el cliente usa solo la clave publicable. Funciones de ayuda en el schema `private`.
 - `supabase/functions/admin-create-user`: Edge Function (clave de servicio) con la que Gerencia crea usuarios; valida el perfil
   del llamador en el servidor. Se despliega con la herramienta MCP de Supabase o `supabase functions deploy`.
+- Recuperación de contraseña: `resetPasswordForEmail` redirige al origen; `AuthProvider` detecta el evento `PASSWORD_RECOVERY`
+  y `App` muestra `ResetPasswordPage`. Cada usuario edita su nombre; un trigger (`guard_profile_update`) impide cambiar `app_role`/correo.
 - Tras cambios de DDL correr los advisors de seguridad de Supabase.
 - Gotcha RLS: una política de `SELECT` que consulte su propia tabla desde una función no ve la fila de un
   `INSERT ... RETURNING`. Evaluar columnas directamente (ver `20261116000100_fix_workers_select_policy.sql`).

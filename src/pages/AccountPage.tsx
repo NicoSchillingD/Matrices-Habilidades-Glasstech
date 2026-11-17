@@ -5,7 +5,10 @@ import { ROLE_LABEL } from '../lib/types'
 import { Alert, PageHead } from '../components/ui'
 
 export default function AccountPage() {
-  const { profile } = useAuth()
+  const { profile, refreshProfile } = useAuth()
+  const [name, setName] = useState<string | null>(null)
+  const [nameMsg, setNameMsg] = useState<{ ok: boolean; text: string } | null>(null)
+  const [nameBusy, setNameBusy] = useState(false)
   const [current, setCurrent] = useState('')
   const [next, setNext] = useState('')
   const [confirm, setConfirm] = useState('')
@@ -14,6 +17,23 @@ export default function AccountPage() {
   const [busy, setBusy] = useState(false)
 
   if (!profile) return null
+
+  async function saveName(e: FormEvent) {
+    e.preventDefault()
+    const value = (name ?? profile!.full_name).trim()
+    if (!value) return setNameMsg({ ok: false, text: 'El nombre no puede quedar vacío.' })
+    setNameBusy(true)
+    setNameMsg(null)
+    const { data, error: err } = await supabase.from('profiles').update({ full_name: value }).eq('id', profile!.id).select()
+    if (err || !data?.length) {
+      setNameMsg({ ok: false, text: err?.message ?? 'No se pudo guardar el nombre.' })
+    } else {
+      await refreshProfile()
+      setName(null)
+      setNameMsg({ ok: true, text: 'Nombre actualizado.' })
+    }
+    setNameBusy(false)
+  }
 
   async function submit(e: FormEvent) {
     e.preventDefault()
@@ -43,10 +63,20 @@ export default function AccountPage() {
 
   return (
     <>
-      <PageHead tag="Mi cuenta" title="Cambiar contraseña">
-        {profile.full_name || profile.email} · {ROLE_LABEL[profile.app_role]} · {profile.email}
+      <PageHead tag="Mi cuenta" title="Mis datos">
+        {ROLE_LABEL[profile.app_role]} · {profile.email}
       </PageHead>
-      <form className="card stack" onSubmit={submit} style={{ maxWidth: 440 }}>
+      <div className="stack" style={{ maxWidth: 440 }}>
+      <form className="card stack" onSubmit={saveName}>
+        <h2>Nombre</h2>
+        <label className="field">Nombre completo
+          <input value={name ?? profile.full_name} onChange={(e) => setName(e.target.value)} required autoComplete="name" />
+        </label>
+        {nameMsg && <Alert kind={nameMsg.ok ? 'ok' : 'error'}>{nameMsg.text}</Alert>}
+        <div className="row"><button className="btn accent" disabled={nameBusy}>Guardar nombre</button></div>
+      </form>
+      <form className="card stack" onSubmit={submit}>
+        <h2>Cambiar contraseña</h2>
         <label className="field">Contraseña actual
           <input type="password" value={current} onChange={(e) => setCurrent(e.target.value)} required autoComplete="current-password" />
         </label>
@@ -62,6 +92,7 @@ export default function AccountPage() {
           <button className="btn accent" disabled={busy}>Guardar contraseña</button>
         </div>
       </form>
+      </div>
     </>
   )
 }
